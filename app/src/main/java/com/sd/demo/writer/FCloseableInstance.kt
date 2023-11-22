@@ -2,15 +2,16 @@ package com.sd.demo.writer
 
 import java.util.concurrent.atomic.AtomicInteger
 
-object AutoCloseableInstance {
+object FCloseableInstance {
     private val _holder: MutableMap<Class<out AutoCloseable>, MutableMap<Any, Pair<AutoCloseable, AtomicInteger>>> = hashMapOf()
 
     inline fun <reified T : AutoCloseable> key(key: Any, noinline factory: () -> T): Holder<T> {
         return key(T::class.java, key, factory)
     }
 
+    @JvmStatic
     fun <T : AutoCloseable> key(clazz: Class<T>, key: Any, factory: () -> T): Holder<T> {
-        synchronized(this@AutoCloseableInstance) {
+        synchronized(this@FCloseableInstance) {
             val map = _holder[clazz] ?: hashMapOf<Any, Pair<AutoCloseable, AtomicInteger>>().also {
                 _holder[clazz] = it
             }
@@ -25,7 +26,7 @@ object AutoCloseableInstance {
     }
 
     private fun <T : AutoCloseable> decrementCount(clazz: Class<T>, key: Any) {
-        synchronized(this@AutoCloseableInstance) {
+        synchronized(this@FCloseableInstance) {
             val map = checkNotNull(_holder[clazz])
             val pair = checkNotNull(map[key])
             val count = pair.second.decrementAndGet()
