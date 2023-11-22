@@ -5,6 +5,10 @@ import java.util.concurrent.atomic.AtomicInteger
 object AutoCloseableInstance {
     private val _holder: MutableMap<Class<out AutoCloseable>, MutableMap<Any, Pair<AutoCloseable, AtomicInteger>>> = hashMapOf()
 
+    inline fun <reified T : AutoCloseable> key(key: Any, noinline factory: () -> T): Holder<T> {
+        return key(T::class.java, key, factory)
+    }
+
     fun <T : AutoCloseable> key(clazz: Class<T>, key: Any, factory: () -> T): Holder<T> {
         synchronized(this@AutoCloseableInstance) {
             val map = _holder[clazz] ?: hashMapOf<Any, Pair<AutoCloseable, AtomicInteger>>().also {
