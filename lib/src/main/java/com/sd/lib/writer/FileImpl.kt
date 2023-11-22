@@ -109,10 +109,7 @@ private class FileImpl private constructor(
             }
     }
 
-    private class CounterOutputStream(
-        output: OutputStream,
-        length: Int,
-    ) : OutputStream() {
+    private class CounterOutputStream(output: OutputStream, length: Int) : OutputStream() {
         private val _output = output
         private var _written = length
 
