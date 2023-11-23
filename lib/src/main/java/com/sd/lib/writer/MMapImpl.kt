@@ -134,7 +134,7 @@ private class MMapImpl(
         } else {
             logMsg { "remaining:$remaining file exist:${file.exists()} ${this@MMapImpl}" }
 
-//            buffer.force()
+//            flush()
             if (file.isFile) {
                 _buffer = null
             } else {
