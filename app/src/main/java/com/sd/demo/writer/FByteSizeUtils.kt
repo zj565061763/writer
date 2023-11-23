@@ -4,9 +4,9 @@ import java.io.File
 import java.text.DecimalFormat
 
 const val FByteKB = 1024L
-const val FByteMB = 1024L * FByteKB
-const val FByteGB = 1024L * FByteMB
-const val FByteTB = 1024L * FByteGB
+const val FByteMB = FByteKB * FByteKB
+const val FByteGB = FByteKB * FByteMB
+const val FByteTB = FByteKB * FByteGB
 
 /**
  * 返回文件或者文件夹的大小（byte）
