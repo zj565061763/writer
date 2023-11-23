@@ -85,11 +85,8 @@ private class MMapImpl(
     }
 
     private fun closeInternal(flush: Boolean = true) {
+        if (flush) flush()
         try {
-            if (flush) {
-                _buffer?.force()
-                _headerBuffer?.force()
-            }
             _raf?.close()
             logMsg { "close ${this@MMapImpl}" }
         } catch (e: Exception) {
