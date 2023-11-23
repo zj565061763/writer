@@ -16,13 +16,13 @@ class MainActivity : AppCompatActivity() {
 
     private val _mmap: FWriter by lazy {
         FWriter.mmap(filesDir.resolve("mmap.log")).apply {
-            this.limit(100 * FByteMB)
+            this.limit(500 * FByteMB)
         }
     }
 
     private val _file: FWriter by lazy {
         FWriter.file(filesDir.resolve("file.log")).apply {
-            this.limit(100 * FByteMB)
+            this.limit(500 * FByteMB)
         }
     }
 
