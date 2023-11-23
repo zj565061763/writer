@@ -52,7 +52,7 @@ private fun testPerformance(
             writer.write(log.toByteArray())
         }
     }.let {
-        logMsg { "$tag time:${it.inWholeMilliseconds} size:${writer.size()}" }
+        logMsg { "$tag time:${it.inWholeMilliseconds} size:${writer.size().fFormatByteSize()}" }
     }
 }
 
