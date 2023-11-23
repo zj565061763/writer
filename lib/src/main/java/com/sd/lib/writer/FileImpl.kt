@@ -100,13 +100,18 @@ private class FileImpl private constructor(
             logMsg { "create file failed ${this@FileImpl}" }
             return null
         }
-        return FileOutputStream(file, true)
-            .buffered()
-            .let { CounterOutputStream(it, file.length().toInt()) }
-            .also {
-                _output = it
-                logMsg { "create output:$it ${this@FileImpl}" }
-            }
+        return try {
+            FileOutputStream(file, true)
+                .buffered()
+                .let { CounterOutputStream(it, file.length().toInt()) }
+                .also {
+                    _output = it
+                    logMsg { "create output:$it ${this@FileImpl}" }
+                }
+        } catch (e: Exception) {
+            logMsg { "create file error:$e ${this@FileImpl}" }
+            null
+        }
     }
 
     private class CounterOutputStream(output: OutputStream, length: Int) : OutputStream() {
