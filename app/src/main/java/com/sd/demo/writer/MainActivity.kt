@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
 private fun testPerformance(
     writer: FWriter,
     tag: String,
-    repeat: Int = 1_0000,
+    repeat: Int = 10_0000,
     logLength: Int = 500,
 ) {
     val log = "1".repeat(logLength)
