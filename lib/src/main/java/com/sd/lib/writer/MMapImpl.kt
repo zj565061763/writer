@@ -1,19 +1,19 @@
 package com.sd.lib.writer
 
 import android.util.Log
+import com.sd.lib.closeable.FCloseableInstance
 import java.io.File
 import java.io.RandomAccessFile
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
-import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.max
 
 internal class MMapApi(
     private val file: File,
 ) : FWriter {
 
-    private val impl: FWriter
-        get() = MMapImpl.getInstance(file)
+    private val _holder = FCloseableInstance.key(file.absolutePath) { MMapImpl(file) }
+    private val impl get() = _holder.instance
 
     override fun write(data: ByteArray): Boolean {
         return impl.write(data)
@@ -30,23 +30,15 @@ internal class MMapApi(
     override fun close() {
         impl.close()
     }
-
-    init {
-        MMapImpl.incrementCount(file)
-    }
-
-    protected fun finalize() {
-        MMapImpl.decrementCount(file)
-    }
 }
 
 private const val HEADER_SIZE: Long = 32
 private const val BUFFER_SIZE: Long = 512 * 1024
 
-private class MMapImpl private constructor(
+private class MMapImpl(
     private val file: File,
     private val debug: Boolean = false,
-) : FWriter {
+) : FWriter, AutoCloseable {
 
     private var _raf: RandomAccessFile? = null
     private var _buffer: MappedByteBuffer? = null
@@ -217,55 +209,6 @@ private class MMapImpl private constructor(
     private inline fun logMsg(block: () -> Any) {
         if (debug) {
             Log.i(MMapImpl::class.java.simpleName, block().toString())
-        }
-    }
-
-    companion object {
-        private val _holder: MutableMap<String, Pair<MMapImpl, AtomicInteger>> = hashMapOf()
-
-        //---------- instance ----------
-
-        fun getInstance(file: File): FWriter {
-            return synchronized(this@Companion) {
-                val path = file.absolutePath
-                _holder[path]?.first ?: (MMapImpl(file) to AtomicInteger(0)).let {
-                    _holder[path] = it
-                    it.first
-                }
-            }
-        }
-
-        private fun removeInstance(file: File) {
-            synchronized(this@Companion) {
-                val path = file.absolutePath
-                _holder.remove(path)
-            }?.let {
-                check(it.second.get() <= 0)
-                it.first.close()
-            }
-        }
-
-        //---------- count ----------
-
-        fun incrementCount(file: File) {
-            synchronized(this@Companion) {
-                getInstance(file)
-                val path = file.absolutePath
-                val counter = checkNotNull(_holder[path]?.second) { "There is no instance bound to $path" }
-                counter.incrementAndGet()
-            }
-        }
-
-        fun decrementCount(file: File) {
-            synchronized(this@Companion) {
-                val path = file.absolutePath
-                val counter = checkNotNull(_holder[path]?.second) { "There is no instance bound to $path" }
-                counter.decrementAndGet().let {
-                    if (it <= 0) {
-                        removeInstance(file)
-                    }
-                }
-            }
         }
     }
 }
