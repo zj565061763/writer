@@ -70,7 +70,7 @@ private class MMapImpl(
     }
 
     override fun limit(size: Long) {
-        _limit = size
+        _limit = if (size > 0) size + HEADER_SIZE + BUFFER_SIZE else size
         checkLimit()
     }
 
