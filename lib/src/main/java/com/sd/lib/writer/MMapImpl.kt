@@ -100,7 +100,7 @@ private class MMapImpl(
     private fun checkLimit() {
         if (_limit > 0 && size() > _limit) {
             close()
-            file.delete()
+            file.deleteRecursively()
         }
     }
 
