@@ -80,7 +80,6 @@ private class FileImpl(
     @Synchronized
     override fun close() {
         try {
-            _output?.flush()
             _output?.close()
             logMsg { "close ${this@FileImpl}" }
         } catch (e: Exception) {
