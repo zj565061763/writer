@@ -81,9 +81,15 @@ private class MMapImpl(
 
     @Synchronized
     override fun close() {
+        closeInternal()
+    }
+
+    private fun closeInternal(flush: Boolean = true) {
         try {
-            _buffer?.force()
-            _headerBuffer?.force()
+            if (flush) {
+                _buffer?.force()
+                _headerBuffer?.force()
+            }
             _raf?.close()
             logMsg { "close ${this@MMapImpl}" }
         } catch (e: Exception) {
@@ -98,7 +104,7 @@ private class MMapImpl(
 
     private fun checkLimit() {
         if (_limit > 0 && size() > _limit) {
-            close()
+            closeInternal(false)
             file.deleteRecursively()
         }
     }
