@@ -21,6 +21,10 @@ internal class FileApi(
         impl.flush()
     }
 
+    override fun limit(size: Long) {
+        impl.limit(size)
+    }
+
     override fun size(): Long {
         return impl.size()
     }
@@ -34,6 +38,8 @@ private class FileImpl(
     private val file: File,
     private val debug: Boolean = false,
 ) : FWriter, AutoCloseable {
+
+    private var _limit: Long = 0
     private var _output: CounterOutputStream? = null
 
     @Synchronized
@@ -47,6 +53,8 @@ private class FileImpl(
             logMsg { "write error:$e ${this@FileImpl}" }
             close()
             false
+        } finally {
+            checkLimit()
         }
     }
 
@@ -59,9 +67,14 @@ private class FileImpl(
         }
     }
 
+    override fun limit(size: Long) {
+        _limit = size
+        checkLimit()
+    }
+
     @Synchronized
     override fun size(): Long {
-        return (getOutput()?.written ?: 0).toLong()
+        return _output?.written?.toLong() ?: file.length()
     }
 
     @Synchronized
@@ -77,12 +90,19 @@ private class FileImpl(
         }
     }
 
+    private fun checkLimit() {
+        if (_limit > 0 && size() > _limit) {
+            close()
+            file.delete()
+        }
+    }
+
     private fun getOutput(): CounterOutputStream? {
         val output = _output
         return if (output == null) {
             createOutput()
         } else {
-            if (file.exists()) output else createOutput()
+            if (file.isFile) output else createOutput()
         }
     }
 

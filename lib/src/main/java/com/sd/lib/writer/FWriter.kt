@@ -7,6 +7,8 @@ interface FWriter {
 
     fun flush()
 
+    fun limit(size: Long)
+
     fun size(): Long
 
     fun close()

@@ -23,6 +23,10 @@ internal class MMapApi(
         impl.flush()
     }
 
+    override fun limit(size: Long) {
+        impl.limit(size)
+    }
+
     override fun size(): Long {
         return impl.size()
     }
@@ -44,12 +48,15 @@ private class MMapImpl(
     private var _buffer: MappedByteBuffer? = null
     private var _headerBuffer: MappedByteBuffer? = null
 
+    private var _limit: Long = 0
     private var _size: Long = -1
 
     @Synchronized
     override fun write(data: ByteArray): Boolean {
         val buffer = getBuffer(data.size) ?: return false
-        return writeBuffer(buffer, data)
+        return writeBuffer(buffer, data).also {
+            checkLimit()
+        }
     }
 
     @Synchronized
@@ -60,6 +67,11 @@ private class MMapImpl(
         } catch (e: Exception) {
             logMsg { "flush error:$e ${this@MMapImpl}" }
         }
+    }
+
+    override fun limit(size: Long) {
+        _limit = size
+        checkLimit()
     }
 
     @Synchronized
@@ -82,6 +94,13 @@ private class MMapImpl(
             _headerBuffer = null
             _raf = null
             _size = -1
+        }
+    }
+
+    private fun checkLimit() {
+        if (_limit > 0 && size() > _limit) {
+            close()
+            file.delete()
         }
     }
 
@@ -117,7 +136,7 @@ private class MMapImpl(
             logMsg { "remaining:$remaining file exist:${file.exists()} ${this@MMapImpl}" }
 
 //            buffer.force()
-            if (file.exists()) {
+            if (file.isFile) {
                 _buffer = null
             } else {
                 close()

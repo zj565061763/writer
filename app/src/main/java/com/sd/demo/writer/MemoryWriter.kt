@@ -20,6 +20,9 @@ class MemoryWriter : FWriter {
     override fun flush() {
     }
 
+    override fun limit(size: Long) {
+    }
+
     override fun size(): Long {
         return _buffer.position().toLong()
     }
