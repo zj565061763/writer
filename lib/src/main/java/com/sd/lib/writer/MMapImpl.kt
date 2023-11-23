@@ -76,8 +76,7 @@ private class MMapImpl(
 
     @Synchronized
     override fun size(): Long {
-        getBuffer(0)
-        return _size
+        return if (_size >= 0) _size else file.length()
     }
 
     @Synchronized
