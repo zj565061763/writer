@@ -158,7 +158,7 @@ private class MMapImpl(
         return try {
             raf.channel.map(FileChannel.MapMode.READ_WRITE, position, bufferSize)?.also {
                 _buffer = it
-                logMsg { "create buffer:$it ${Integer.toHexString(it.hashCode())} ${this@MMapImpl}" }
+                logMsg { "create buffer ${this@MMapImpl}" }
             }
         } catch (e: Exception) {
             logMsg { "create buffer error:$e" }
